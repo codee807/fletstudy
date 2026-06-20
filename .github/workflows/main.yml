@@ -1,22 +1,46 @@
-name: Build APK
+name: Build Android APK
 
+# 触发条件：当代码被推送到 main 分支时，自动开始打包
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
-  build:
+  build-android:
+    # 运行环境：使用 Ubuntu 最新版
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # 步骤 1：拉取你的仓库代码
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 步骤 2：设置 Python 环境
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: Install Flet
-        run: pip install flet
-      - name: Build APK
-        run: flet build apk --yes --verbose
+          python-version: '3.10' 
+
+      # 步骤 3：安装 Buildozer 和其他必要依赖
+      - name: Install Buildozer and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip3 install buildozer
+          # 验证安装
+          buildozer --version
+
+      # 步骤 4：使用 Buildozer 编译 APK
+      # 这是核心步骤，会自动下载 SDK, NDK 等，耗时较长
+      - name: Build with Buildozer
+        run: |
+          # 这行命令会读取你的 buildozer.spec 并开始编译
+          buildozer android debug deploy run
+
+      # 步骤 5：上传生成的 APK 文件
+      # 编译成功后，APK 会作为“工件 (Artifact)”保存，你可以从 GitHub 页面下载
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: quiz-app
-          path: build/apk/*.apk
+          name: MyApp-APK
+          path: bin/*.apk
