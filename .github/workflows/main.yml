@@ -14,10 +14,7 @@ jobs:
       - name: Install Flet
         run: pip install flet
       - name: Build APK
-        env:
-          FLUTTER_STORAGE_BASE_URL: https://mirrors.tuna.tsinghua.edu.cn/flutter
-          PUB_HOSTED_URL: https://mirrors.tuna.tsinghua.edu.cn/dart-pub
-        run: flet build apk --yes
+        run: flet build apk --yes --verbose
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
